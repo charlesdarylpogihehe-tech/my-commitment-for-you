@@ -33,7 +33,31 @@ let noChoiceCount = 0;
 const MAX_NO_CLICKS = 6;
 
 // ========================================
-// EDITOR TOGGLE
+// MODAL HELPERS
+// ========================================
+
+function openModal(id) {
+  $(id).classList.remove("hidden");
+  document.body.style.overflow = "hidden";
+}
+
+function closeModal(id) {
+  $(id).classList.add("hidden");
+
+  const anyOpen = [
+    "letterModal",
+    "ringModal",
+    "proposalModal",
+    "responseModal"
+  ].some(id => !$(id).classList.contains("hidden"));
+
+  if (!anyOpen) {
+    document.body.style.overflow = "";
+  }
+}
+
+// ========================================
+// EDITOR
 // ========================================
 
 $("editToggle").addEventListener("click", () => {
@@ -41,12 +65,10 @@ $("editToggle").addEventListener("click", () => {
   $("editor").classList.toggle("hidden");
 
   if (!$("editor").classList.contains("hidden")) {
-
     $("editor").scrollIntoView({
       behavior: "smooth",
       block: "start"
     });
-
   }
 
 });
@@ -63,26 +85,25 @@ $("photo").addEventListener("change", (e) => {
     ? selectedPhoto.name
     : "No photo selected";
 
-  if (selectedPhoto && selectedPhoto.size > 5 * 1024 * 1024) {
-
-    $("editorStatus").textContent =
-      "Your photo is over 5 MB. Please choose a smaller image.";
+  if (selectedPhoto &&
+      selectedPhoto.size > 5 * 1024 * 1024) {
 
     selectedPhoto = null;
     e.target.value = "";
 
     $("fileName").textContent = "No photo selected";
 
+    $("editorStatus").textContent =
+      "Please choose a main photo smaller than 5 MB.";
+
   } else {
-
     $("editorStatus").textContent = "";
-
   }
 
 });
 
 // ========================================
-// PROMISE RING PHOTO SELECTION
+// RING PHOTO SELECTION
 // ========================================
 
 $("ringPhoto").addEventListener("change", (e) => {
@@ -93,13 +114,8 @@ $("ringPhoto").addEventListener("change", (e) => {
     ? selectedRingPhoto.name
     : "No ring photo selected";
 
-  if (
-    selectedRingPhoto &&
-    selectedRingPhoto.size > 5 * 1024 * 1024
-  ) {
-
-    $("editorStatus").textContent =
-      "Your ring photo is over 5 MB. Please choose a smaller image.";
+  if (selectedRingPhoto &&
+      selectedRingPhoto.size > 5 * 1024 * 1024) {
 
     selectedRingPhoto = null;
     e.target.value = "";
@@ -107,16 +123,17 @@ $("ringPhoto").addEventListener("change", (e) => {
     $("ringFileName").textContent =
       "No ring photo selected";
 
+    $("editorStatus").textContent =
+      "Please choose a ring photo smaller than 5 MB.";
+
   } else {
-
     $("editorStatus").textContent = "";
-
   }
 
 });
 
 // ========================================
-// DISPLAY SAVED NOTE
+// DISPLAY NOTE
 // ========================================
 
 function applyNote(note) {
@@ -126,12 +143,7 @@ function applyNote(note) {
   currentPhotoUrl = note.photo_url || null;
   currentRingPhotoUrl = note.ring_photo_url || null;
 
-  // SENDER NAME
-
-  $("signature").textContent =
-    note.sender_name || "Someone who cares about you";
-
-  // RECIPIENT NAME
+  // RECIPIENT
 
   $("greeting").textContent = note.recipient_name
     ? `Dear ${note.recipient_name},`
@@ -142,12 +154,15 @@ function applyNote(note) {
   $("displayMessage").textContent =
     note.message || "";
 
+  // SENDER
+
+  $("signature").textContent =
+    note.sender_name || "Someone who cares about you";
+
   // MAIN PHOTO
 
   if (note.photo_url) {
-
     $("displayPhoto").src = note.photo_url;
-
   }
 
   // PROMISE RING PHOTO
@@ -158,17 +173,26 @@ function applyNote(note) {
 
     $("displayRingPhoto").classList.remove("hidden");
 
-    $("ringPhotoPlaceholder").classList.add("hidden");
+    $("ringPlaceholder").classList.add("hidden");
+
+    // Wait for image loading to verify the URL.
+    $("displayRingPhoto").onerror = () => {
+
+      $("displayRingPhoto").classList.add("hidden");
+
+      $("ringPlaceholder").classList.remove("hidden");
+
+      console.error("Could not display the promise ring image.");
+
+    };
 
   } else {
 
     $("displayRingPhoto").classList.add("hidden");
 
-    $("ringPhotoPlaceholder").classList.remove("hidden");
+    $("ringPlaceholder").classList.remove("hidden");
 
   }
-
-  // PAGE TITLE
 
   document.title = note.recipient_name
     ? `A little note for ${note.recipient_name}`
@@ -177,7 +201,7 @@ function applyNote(note) {
 }
 
 // ========================================
-// IMAGE UPLOAD FUNCTION
+// IMAGE UPLOAD
 // ========================================
 
 async function uploadImage(file, folder) {
@@ -188,9 +212,10 @@ async function uploadImage(file, folder) {
     file.name.split(".").pop() || "jpg"
   ).toLowerCase().replace(/[^a-z0-9]/g, "");
 
-  const filePath = `${folder}/${crypto.randomUUID()}.${extension}`;
+  const filePath =
+    `${folder}/${crypto.randomUUID()}.${extension}`;
 
-  const { error: uploadError } = await db.storage
+  const { error } = await db.storage
     .from("love-photos")
     .upload(filePath, file, {
       cacheControl: "3600",
@@ -198,29 +223,29 @@ async function uploadImage(file, folder) {
       contentType: file.type
     });
 
-  if (uploadError) {
-    throw uploadError;
-  }
+  if (error) throw error;
 
   const { data } = db.storage
     .from("love-photos")
     .getPublicUrl(filePath);
+
+  if (!data.publicUrl) {
+    throw new Error("Could not generate the image URL.");
+  }
 
   return data.publicUrl;
 
 }
 
 // ========================================
-// LOAD SAVED MESSAGE FROM SUPABASE
+// LOAD SAVED NOTE
 // ========================================
 
 async function loadNote() {
 
   if (!db) {
 
-    console.warn(
-      "Supabase is not configured. Check config.js."
-    );
+    console.error("Supabase is not configured.");
 
     return;
 
@@ -236,31 +261,28 @@ async function loadNote() {
       ring_photo_url,
       created_at
     `)
-    .order("created_at", { ascending: false })
+    .order("created_at", {
+      ascending: false
+    })
     .limit(1)
     .maybeSingle();
 
   if (error) {
 
-    console.error(
-      "Could not load love note:",
-      error.message
-    );
+    console.error("Loading error:", error);
 
     return;
 
   }
 
   if (data) {
-
     applyNote(data);
-
   }
 
 }
 
 // ========================================
-// SAVE MESSAGE AND PHOTOS
+// SAVE LOVE NOTE
 // ========================================
 
 $("proposalForm").addEventListener("submit", async (e) => {
@@ -270,7 +292,7 @@ $("proposalForm").addEventListener("submit", async (e) => {
   if (!db) {
 
     $("editorStatus").textContent =
-      "Supabase is not configured. Please check config.js.";
+      "Supabase is not configured. Check your config.js.";
 
     return;
 
@@ -285,7 +307,7 @@ $("proposalForm").addEventListener("submit", async (e) => {
   if (!sender || !message) {
 
     $("editorStatus").textContent =
-      "Please provide your name and message.";
+      "Please enter your name and your message.";
 
     return;
 
@@ -294,14 +316,11 @@ $("proposalForm").addEventListener("submit", async (e) => {
   const button = $("saveButton");
 
   button.disabled = true;
-
   button.textContent = "Saving your love note...";
 
   $("editorStatus").textContent = "";
 
   try {
-
-    // PRESERVE EXISTING PHOTO URLS IF NO NEW PHOTO IS SELECTED
 
     let photoUrl = currentPhotoUrl;
     let ringPhotoUrl = currentRingPhotoUrl;
@@ -328,9 +347,19 @@ $("proposalForm").addEventListener("submit", async (e) => {
 
     }
 
-    // SAVE EVERYTHING TO DATABASE
+    // REQUIRE A RING PHOTO FOR THIS VERSION
 
-    const { error } = await db
+    if (!ringPhotoUrl) {
+
+      throw new Error(
+        "Please upload your promise ring picture."
+      );
+
+    }
+
+    // SAVE DATABASE RECORD
+
+    const { data, error } = await db
       .from("love_notes")
       .insert({
 
@@ -344,31 +373,17 @@ $("proposalForm").addEventListener("submit", async (e) => {
 
         ring_photo_url: ringPhotoUrl
 
-      });
+      })
+      .select()
+      .single();
 
-    if (error) {
+    if (error) throw error;
 
-      throw error;
+    // UPDATE WEBSITE
 
-    }
+    applyNote(data);
 
-    // UPDATE WEBSITE CONTENT
-
-    applyNote({
-
-      sender_name: sender,
-
-      recipient_name: recipient,
-
-      message: message,
-
-      photo_url: photoUrl,
-
-      ring_photo_url: ringPhotoUrl
-
-    });
-
-    // RESET SELECTED FILES
+    // RESET FILE INPUTS
 
     selectedPhoto = null;
     selectedRingPhoto = null;
@@ -376,162 +391,178 @@ $("proposalForm").addEventListener("submit", async (e) => {
     $("photo").value = "";
     $("ringPhoto").value = "";
 
-    $("fileName").textContent = "No photo selected";
+    $("fileName").textContent =
+      "No photo selected";
 
     $("ringFileName").textContent =
       "No ring photo selected";
 
     $("editorStatus").textContent =
-      "Your love note and photos were saved successfully. ♡";
-
-    // RETURN TO HOMEPAGE
+      "Your message and both pictures have been saved successfully! ♡";
 
     $("proposal").scrollIntoView({
       behavior: "smooth"
     });
 
-  } catch (err) {
+  } catch (error) {
 
-    console.error(err);
+    console.error("Save error:", error);
 
     $("editorStatus").textContent =
-      `Could not save: ${err.message}. Please check your Supabase database and storage permissions.`;
+      "Could not save: " + error.message;
 
   } finally {
 
     button.disabled = false;
 
-    button.innerHTML =
-      'Save my love note <span>♡</span>';
+    button.textContent = "Save my love note ♡";
 
   }
 
 });
 
 // ========================================
-// LETTER POPUP
+// STEP 1: OPEN LETTER
 // ========================================
 
 $("openLetter").addEventListener("click", () => {
 
-  $("letterModal").classList.remove("hidden");
-
-  document.body.style.overflow = "hidden";
+  openModal("letterModal");
 
 });
 
-function closeLetter() {
+$("closeLetter").addEventListener("click", () => {
 
-  $("letterModal").classList.add("hidden");
-
-  document.body.style.overflow = "";
-
-}
-
-$("closeLetter").addEventListener("click", closeLetter);
-
-$("letterModal").addEventListener("click", (e) => {
-
-  if (e.target === $("letterModal")) {
-
-    closeLetter();
-
-  }
+  closeModal("letterModal");
 
 });
 
 // ========================================
-// OPEN PROMISE RING AND COURTING QUESTION
+// STEP 2: LETTER TO RING
+// ========================================
+
+$("continueToRing").addEventListener("click", () => {
+
+  closeModal("letterModal");
+
+  // Always use the currently loaded ring image.
+  if (currentRingPhotoUrl) {
+
+    $("displayRingPhoto").src = currentRingPhotoUrl;
+
+    $("displayRingPhoto").classList.remove("hidden");
+
+    $("ringPlaceholder").classList.add("hidden");
+
+  } else {
+
+    $("displayRingPhoto").classList.add("hidden");
+
+    $("ringPlaceholder").classList.remove("hidden");
+
+  }
+
+  openModal("ringModal");
+
+});
+
+$("closeRing").addEventListener("click", () => {
+
+  closeModal("ringModal");
+
+});
+
+// ========================================
+// STEP 3: RING TO COURTING QUESTION
 // ========================================
 
 $("continueToQuestion").addEventListener("click", () => {
 
-  $("letterModal").classList.add("hidden");
+  closeModal("ringModal");
 
-  $("proposalModal").classList.remove("hidden");
+  // RESET BUTTONS WHEN QUESTION OPENS
 
-  document.body.style.overflow = "hidden";
+  noChoiceCount = 0;
+
+  $("yesButton").style.transform = "scale(1)";
+
+  $("talkButton").style.transform = "scale(1)";
+
+  $("talkButton").classList.remove(
+    "hidden",
+    "disappearing"
+  );
+
+  $("answerFeedback").textContent = "";
+
+  openModal("proposalModal");
+
+});
+
+$("closeProposal").addEventListener("click", () => {
+
+  closeModal("proposalModal");
 
 });
 
 // ========================================
-// CLOSE PROMISE RING POPUP
+// STEP 4: NO BUTTON
+// YES GROWS AND NO SHRINKS
 // ========================================
 
-function closeProposal() {
+const noMessages = [
 
-  $("proposalModal").classList.add("hidden");
+  "Are you sure? Take your time. ♡",
 
-  document.body.style.overflow = "";
+  "I hope I can make you smile. ♡",
 
-}
+  "I promise to be sincere with you. ♡",
 
-$("closeProposal").addEventListener("click", closeProposal);
+  "I will always respect your feelings. ♡",
 
-$("proposalModal").addEventListener("click", (e) => {
+  "My intentions are genuine. ♡",
 
-  if (e.target === $("proposalModal")) {
+  "Thank you for considering my question. ♡"
 
-    closeProposal();
-
-  }
-
-});
-
-// ========================================
-// NO BUTTON - YES GROWS, NO SHRINKS
-// ========================================
+];
 
 $("talkButton").addEventListener("click", () => {
 
   noChoiceCount++;
 
-  // YES BUTTON GETS BIGGER
+  // YES BUTTON GROWS
 
   const yesScale = Math.min(
-    1 + noChoiceCount * 0.13,
-    1.55
+    1 + noChoiceCount * 0.15,
+    1.9
   );
 
   $("yesButton").style.transform =
     `scale(${yesScale})`;
 
-  // NO BUTTON GETS SMALLER
+  // NO BUTTON SHRINKS
 
   const noScale = Math.max(
-    1 - noChoiceCount * 0.15,
-    0.10
+    1 - noChoiceCount * 0.16,
+    0.05
   );
 
   $("talkButton").style.transform =
     `scale(${noScale})`;
 
-  // SWEET MESSAGES
-
-  const replies = [
-
-    "Are you sure? Take your time. ♡",
-
-    "I hope I can make you smile. ♡",
-
-    "I promise to be sincere with you. ♡",
-
-    "I'll always respect your feelings. ♡",
-
-    "My intentions are genuine. ♡",
-
-    "Thank you for considering my question. ♡"
-
-  ];
+  // UPDATE MESSAGE
 
   $("answerFeedback").textContent =
-    replies[noChoiceCount - 1];
+    noMessages[noChoiceCount - 1];
 
-  // AFTER SIX NO CLICKS, HIDE THE NO BUTTON
+  // AFTER SIX CLICKS, REMOVE NO BUTTON
 
   if (noChoiceCount >= MAX_NO_CLICKS) {
 
     $("talkButton").classList.add("disappearing");
+
+    $("answerFeedback").textContent =
+      "I hope you'll give me a chance. ♡";
 
     setTimeout(() => {
 
@@ -539,91 +570,123 @@ $("talkButton").addEventListener("click", () => {
 
     }, 350);
 
-    $("answerFeedback").textContent =
-      "I hope you'll give me a chance. ♡";
-
   }
 
 });
 
 // ========================================
-// YES BUTTON - THANK YOU POPUP
+// STEP 5: YES BUTTON
+// CLOSE QUESTION AND SHOW THANK YOU
 // ========================================
 
 $("yesButton").addEventListener("click", () => {
 
-  // CLOSE COURTING QUESTION
+  closeModal("proposalModal");
 
-  $("proposalModal").classList.add("hidden");
+  $("modalTitle").textContent =
+    "Thank you, my love! ♡";
 
-  // OPEN THANK YOU POPUP
-
-  showResponse(
-
-    "Thank you, my love. ♡",
+  $("modalText").textContent =
 
     "You have no idea how happy you just made me.\n\n" +
 
     "Thank you for giving me the chance to court you. " +
 
-    "I promise to make an effort, be patient, and show you " +
+    "I promise to be patient, sincere, and consistent. " +
 
-    "through my actions how genuine my intentions are.\n\n" +
+    "I want to show you through my actions how genuine " +
+
+    "my intentions are.\n\n" +
+
+    "I can't wait to see you and give you your promise ring " +
+
+    "personally.\n\n" +
 
     "This is just the beginning of something beautiful. " +
 
-    "I can't wait to create more memories with you.\n\n" +
+    "Thank you for giving me this opportunity. ♡";
 
-    "Thank you for giving me this opportunity. ♡"
-
-  );
+  openModal("responseModal");
 
 });
 
 // ========================================
-// THANK YOU POPUP
+// THANK YOU POPUP CONTROLS
 // ========================================
 
-function showResponse(title, body) {
+$("closeModal").addEventListener("click", () => {
 
-  $("modalTitle").textContent = title;
+  closeModal("responseModal");
 
-  $("modalText").textContent = body;
+});
 
-  $("responseModal").classList.remove("hidden");
+$("modalDone").addEventListener("click", () => {
 
-  document.body.style.overflow = "hidden";
+  closeModal("responseModal");
 
-}
-
-function closeModal() {
-
-  $("responseModal").classList.add("hidden");
-
-  document.body.style.overflow = "";
-
-}
-
-$("closeModal").addEventListener("click", closeModal);
-
-$("modalDone").addEventListener("click", closeModal);
+});
 
 $("responseModal").addEventListener("click", (e) => {
 
   if (e.target === $("responseModal")) {
+    closeModal("responseModal");
+  }
 
-    closeModal();
+});
+
+// ========================================
+// CLICK OUTSIDE TO CLOSE POPUPS
+// ========================================
+
+$("letterModal").addEventListener("click", (e) => {
+
+  if (e.target === $("letterModal")) {
+    closeModal("letterModal");
+  }
+
+});
+
+$("ringModal").addEventListener("click", (e) => {
+
+  if (e.target === $("ringModal")) {
+    closeModal("ringModal");
+  }
+
+});
+
+$("proposalModal").addEventListener("click", (e) => {
+
+  if (e.target === $("proposalModal")) {
+    closeModal("proposalModal");
+  }
+
+});
+
+// ========================================
+// ESCAPE KEY
+// ========================================
+
+document.addEventListener("keydown", (e) => {
+
+  if (e.key === "Escape") {
+
+    [
+      "letterModal",
+      "ringModal",
+      "proposalModal",
+      "responseModal"
+    ].forEach(id => {
+      if (!$(id).classList.contains("hidden")) {
+        closeModal(id);
+      }
+    });
 
   }
 
 });
 
 // ========================================
-// INITIALIZE WEBSITE
+// INITIALIZE
 // ========================================
 
-document.addEventListener("DOMContentLoaded", () => {
-
-  loadNote();
-
-});
+loadNote();
