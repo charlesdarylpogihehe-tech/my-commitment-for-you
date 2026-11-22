@@ -160,7 +160,7 @@ main {
   min-height: 440px;
 }
 
-/* PHOTO */
+/* MAIN PHOTO */
 
 .photo-frame {
   width: min(390px, 90%);
@@ -318,61 +318,60 @@ main {
   display: grid;
   grid-template-columns: .9fr 1.1fr;
   align-items: center;
-  gap: 80px;
-  padding: 30px 8% 130px;
+  gap: 55px;
+  padding: 30px 5% 75px;
 }
 
 .ring-art {
-  height: 290px;
+  height: 320px;
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
 }
 
-.ring-glow {
-  width: 235px;
-  height: 235px;
-  border-radius: 50%;
-  background: radial-gradient(circle, #f6e6df 0, #f9eeea 42%, transparent 70%);
-  position: absolute;
-}
-
-.ring {
-  width: 132px;
-  height: 132px;
-  border: 12px solid #c8a56f;
-  border-radius: 50%;
-  transform: rotate(-25deg);
+.ring-photo-container {
+  width: 290px;
+  height: 290px;
+  max-width: 85vw;
+  max-height: 85vw;
   position: relative;
-  box-shadow: inset 0 0 10px #fff8, 0 10px 20px #80634a30;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  padding: 12px;
+  border: 1px solid #ead8d5;
+  box-shadow: 0 20px 50px #79515b20;
+  transform: rotate(-3deg);
 }
 
-.ring:before {
-  content: "";
-  position: absolute;
-  inset: 5px;
-  border: 2px solid #f4dfb9;
-  border-radius: 50%;
+.ring-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
 }
 
-.ring-stone {
-  position: absolute;
-  width: 31px;
-  height: 31px;
-  background: linear-gradient(135deg, #fff, #d8e2e2 45%, #fff);
-  border: 3px solid #d4c5aa;
-  transform: rotate(45deg);
-  border-radius: 5px;
-  top: -27px;
-  left: 38px;
-  box-shadow: 0 3px 8px #8c7d6b55;
+.ring-placeholder {
+  text-align: center;
+  color: var(--rose);
+  font-family: "Playfair Display", serif;
+}
+
+.ring-placeholder span {
+  font-size: 65px;
+}
+
+.ring-placeholder p {
+  font-style: italic;
+  font-size: 17px;
+  line-height: 1.6;
 }
 
 .ring-spark {
   position: absolute;
-  right: 12%;
-  top: 24%;
+  right: 5%;
+  top: 18%;
   font-size: 35px;
   color: var(--rose);
 }
@@ -389,11 +388,19 @@ main {
   color: var(--muted);
 }
 
+.meet-message {
+  font-family: "Playfair Display", serif;
+  font-style: italic;
+  color: var(--rose-dark) !important;
+  font-size: 17px !important;
+  margin-top: 22px;
+}
+
 /* COURTING QUESTION */
 
 .question-section {
   text-align: center;
-  padding: 70px 20px 105px;
+  padding: 70px 20px 85px;
   border-top: 1px solid var(--line);
   max-width: 790px;
   margin: auto;
@@ -458,9 +465,9 @@ main {
   position: relative;
   z-index: 1;
   transform-origin: center;
-  transition: transform .4s ease, opacity .3s ease;
   min-width: 145px;
   min-height: 46px;
+  transition: transform .4s ease, opacity .3s ease;
 }
 
 #talkButton:hover {
@@ -474,7 +481,7 @@ main {
 }
 
 .answer-feedback {
-  min-height: 22px !important;
+  min-height: 22px;
   margin-top: 20px !important;
   color: var(--rose-dark) !important;
 }
@@ -586,7 +593,8 @@ footer {
   font-weight: 400;
 }
 
-.upload-box #fileName {
+.upload-box #fileName,
+.upload-box #ringFileName {
   width: 100%;
   padding-left: 32px;
   color: var(--muted);
@@ -620,65 +628,13 @@ footer {
 
 .journey-modal-card {
   position: relative;
-  width: min(760px, 100%);
+  width: min(820px, 100%);
   max-height: 92vh;
   overflow-y: auto;
   background: var(--cream);
   padding: 48px clamp(22px, 5vw, 55px);
   box-shadow: 0 25px 90px #170c1055;
   animation: fadeUp .45s ease both;
-}
-
-.journey-modal-card .close-modal {
-  position: sticky;
-  float: right;
-  top: 0;
-  margin: -28px -25px 0 0;
-  z-index: 2;
-  background: #fff9;
-  border-radius: 50%;
-  width: 36px;
-  height: 36px;
-}
-
-.letter-modal-card {
-  max-width: 820px;
-  padding: 45px clamp(20px, 5vw, 55px) 35px;
-}
-
-.letter-modal-card .letter-section {
-  display: block !important;
-  padding: 8px 0 12px;
-}
-
-.letter-modal-card .letter-paper {
-  max-width: 100%;
-}
-
-.journey-modal-card .promise-section {
-  padding: 10px 0 25px;
-  gap: 25px;
-}
-
-.journey-modal-card .ring-art {
-  height: 210px;
-}
-
-.journey-modal-card .promise-copy h2 {
-  font-size: 35px;
-}
-
-.journey-modal-card .question-section {
-  padding: 30px 5px 15px;
-  border-top: 1px solid var(--line);
-}
-
-.journey-modal-card .question-section h2 {
-  font-size: clamp(39px, 6vw, 54px);
-}
-
-.journey-modal-card .question-section > p {
-  max-width: 500px;
 }
 
 .close-modal {
@@ -690,6 +646,21 @@ footer {
   font-size: 25px;
   color: var(--muted);
   cursor: pointer;
+  z-index: 3;
+}
+
+.letter-modal-card {
+  max-width: 820px;
+  padding: 45px clamp(20px, 5vw, 55px) 35px;
+}
+
+.letter-modal-card .letter-section {
+  display: block;
+  padding: 8px 0 12px;
+}
+
+.letter-modal-card .letter-paper {
+  max-width: 100%;
 }
 
 /* THANK YOU POPUP */
@@ -742,6 +713,7 @@ footer {
     opacity: 0;
     transform: translateY(22px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -749,8 +721,13 @@ footer {
 }
 
 @keyframes heartbeat {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.15); }
+  0%, 100% {
+    transform: scale(1);
+  }
+
+  50% {
+    transform: scale(1.15);
+  }
 }
 
 /* MOBILE RESPONSIVENESS */
@@ -807,12 +784,17 @@ footer {
   .promise-section {
     grid-template-columns: 1fr;
     gap: 15px;
-    padding: 20px 4% 85px;
+    padding: 20px 4% 65px;
     text-align: center;
   }
 
   .ring-art {
-    height: 240px;
+    height: 280px;
+  }
+
+  .ring-photo-container {
+    width: 255px;
+    height: 255px;
   }
 
   .promise-copy h2 {
@@ -843,22 +825,6 @@ footer {
     padding: 42px 22px 28px;
   }
 
-  .journey-modal-card .promise-section {
-    grid-template-columns: 1fr;
-  }
-
-  .journey-modal-card .ring-art {
-    height: 190px;
-  }
-
-  .journey-modal-card .promise-copy {
-    text-align: center;
-  }
-
-  .journey-modal-card .question-section {
-    padding-top: 25px;
-  }
-
   .letter-modal-card {
     padding: 42px 14px 24px;
   }
@@ -867,6 +833,9 @@ footer {
     padding: 38px 22px;
   }
 
+  .modal-card {
+    padding: 45px 24px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
