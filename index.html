@@ -4,15 +4,13 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#fff7f5">
+  <meta name="theme-color" content="#fff8f6">
   <title>A Little Something for You</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Playfair+Display:ital,wght@0,500;0,600;0,700;1,500;1,600&display=swap" rel="stylesheet">
 
   <link rel="stylesheet" href="style.css">
-
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 
@@ -21,15 +19,9 @@
   <div class="ambient ambient-one"></div>
   <div class="ambient ambient-two"></div>
 
-  <!-- HEADER -->
   <header class="topbar">
-    <a class="brand" href="#">
-      <span class="brand-heart">♡</span> just for you
-    </a>
-
-    <button id="editToggle" class="text-button" type="button">
-      Create / Edit
-    </button>
+    <a class="brand" href="#">♡ just for you</a>
+    <button id="editToggle" class="text-button">CREATE / EDIT</button>
   </header>
 
   <main>
@@ -38,73 +30,50 @@
     <section id="editor" class="editor-card hidden">
 
       <div class="editor-heading">
-        <span class="eyebrow">THE LITTLE LOVE NOTE STUDIO</span>
+        <span class="eyebrow">YOUR PERSONAL LOVE NOTE</span>
         <h2>Make this moment yours.</h2>
-        <p>Upload your pictures and write your personal message.</p>
+        <p>Prepare your message and upload your special pictures.</p>
       </div>
 
       <form id="proposalForm">
 
         <label>
           Your name
-          <input
-            id="senderName"
-            maxlength="50"
-            placeholder="Your name"
-            required
-          >
+          <input id="senderName" maxlength="50" placeholder="Your name" required>
         </label>
 
         <label>
-          Her name <span class="optional">(optional)</span>
-          <input
-            id="recipientName"
-            maxlength="50"
-            placeholder="Her name"
-          >
+          Her name
+          <input id="recipientName" maxlength="50" placeholder="Her name">
         </label>
 
         <label>
           Your message
-          <textarea
-            id="message"
-            rows="7"
-            maxlength="3000"
-            placeholder="Write from the heart..."
-            required
-          ></textarea>
+          <textarea id="message" rows="8" maxlength="5000" placeholder="Write your message from the heart..." required></textarea>
         </label>
 
-        <!-- MAIN PHOTO UPLOAD -->
         <label class="upload-label">
-          A photo that means something to you
-
+          Your special picture
           <input id="photo" type="file" accept="image/*">
-
           <span class="upload-box">
-            <span class="upload-icon">＋</span>
-            <strong>Choose a photo</strong>
-            <small>JPG, PNG or WEBP · ideally under 5 MB</small>
+            <strong>＋ Choose a photo</strong>
+            <small>JPG, PNG or WEBP · Maximum 5 MB</small>
             <span id="fileName">No photo selected</span>
           </span>
         </label>
 
-        <!-- RING PHOTO UPLOAD -->
         <label class="upload-label">
-          A picture of the promise ring
-
+          Your promise ring picture
           <input id="ringPhoto" type="file" accept="image/*">
-
           <span class="upload-box">
-            <span class="upload-icon">♡</span>
-            <strong>Choose your ring photo</strong>
-            <small>JPG, PNG or WEBP · ideally under 5 MB</small>
+            <strong>♡ Choose your ring photo</strong>
+            <small>JPG, PNG or WEBP · Maximum 5 MB</small>
             <span id="ringFileName">No ring photo selected</span>
           </span>
         </label>
 
-        <button class="primary-button" id="saveButton" type="submit">
-          Save my love note <span>♡</span>
+        <button id="saveButton" class="primary-button full-button" type="submit">
+          Save my love note ♡
         </button>
 
         <p id="editorStatus" class="status" role="status"></p>
@@ -117,13 +86,11 @@
 
       <div class="hero-copy">
 
-        <span class="eyebrow">
-          <span class="tiny-heart">♥</span> A NOTE FROM THE HEART
-        </span>
+        <span class="eyebrow">♥ A NOTE FROM THE HEART</span>
 
-        <h1 id="headline">
+        <h1>
           There's something<br>
-          <em>I want to ask you.</em>
+          <em>I want to ask you, my baby.</em>
         </h1>
 
         <p class="intro">
@@ -135,23 +102,12 @@
 
       <div class="hero-art">
 
-        <button
-          class="photo-frame photo-open"
-          id="openLetter"
-          type="button"
-          aria-label="Tap to open your letter"
-        >
-
-          <img
-            id="displayPhoto"
+        <button id="openLetter" class="photo-frame" type="button">
+          <img id="displayPhoto"
             src="https://images.unsplash.com/photo-1518895949257-7621c3c786d7?auto=format&fit=crop&w=1000&q=85"
-            alt="A photo chosen for you"
-          >
+            alt="A special picture">
 
-          <div class="photo-caption">
-            tap to open your letter <span>♡</span>
-          </div>
-
+          <span class="photo-caption">tap to open your letter ♡</span>
         </button>
 
         <span class="sparkle sparkle-a">✧</span>
@@ -162,253 +118,194 @@
 
     </section>
 
-    <!-- LETTER POPUP -->
-    <div
-      id="letterModal"
-      class="journey-modal hidden"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Your personal letter"
-    >
-
-      <div class="journey-modal-card letter-modal-card">
-
-        <button
-          id="closeLetter"
-          class="close-modal"
-          type="button"
-          aria-label="Close letter"
-        >×</button>
-
-        <section id="letter" class="letter-section">
-
-          <div class="section-kicker">
-            A FEW WORDS FOR YOU
-          </div>
-
-          <div class="letter-paper">
-
-            <div class="letter-top">♡</div>
-
-            <p class="letter-greeting" id="greeting">
-              Dear you,
-            </p>
-
-            <div id="displayMessage" class="message-text">
-Some people come into our lives and make ordinary days feel a little brighter. You have a way of doing that, and I wanted to tell you how much I appreciate you.
-
-I don't want to rush you or make you feel pressured. I simply want to be honest about what I feel, and let you know that my intentions are genuine.
-
-If you are comfortable with it, I would love the chance to court you—to get to know you more deeply, make you smile, and show you through my actions that you are someone worth making an effort for.
-            </div>
-
-            <p class="letter-signoff">With sincerity,</p>
-
-            <p class="signature" id="signature">
-              Someone who cares about you
-            </p>
-
-            <div class="letter-actions">
-              <button
-                id="continueToQuestion"
-                class="primary-button"
-                type="button"
-              >
-                There's one more thing… <span>♡</span>
-              </button>
-            </div>
-
-          </div>
-
-        </section>
-
-      </div>
-    </div>
-
-    <!-- PROMISE RING AND COURTING QUESTION -->
-    <div
-      id="proposalModal"
-      class="journey-modal hidden"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="question"
-    >
-
-      <div class="journey-modal-card">
-
-        <button
-          id="closeProposal"
-          class="close-modal"
-          type="button"
-          aria-label="Close"
-        >×</button>
-
-        <!-- PROMISE RING SECTION -->
-        <section class="promise-section">
-
-          <div class="ring-art">
-
-            <div id="ringPhotoContainer" class="ring-photo-container">
-
-              <img
-                id="displayRingPhoto"
-                class="ring-photo hidden"
-                src=""
-                alt="The promise ring I chose for you"
-              >
-
-              <div id="ringPhotoPlaceholder" class="ring-placeholder">
-                <span>♡</span>
-                <p>A little something<br>chosen for you.</p>
-              </div>
-
-            </div>
-
-            <span class="ring-spark">✧</span>
-
-          </div>
-
-          <div class="promise-copy">
-
-            <span class="eyebrow">
-              SOMETHING I WANT TO GIVE YOU
-            </span>
-
-            <h2>
-              Not through a screen,<br>
-              <em>but in person.</em>
-            </h2>
-
-            <p>
-              I bought something special for you, and I don't want
-              this moment to happen just through a website.
-            </p>
-
-            <p>
-              I want to give this promise ring to you personally.
-              I want to see your smile, look into your eyes, and
-              tell you how much this little ring means to me.
-            </p>
-
-            <p>
-              This ring represents my genuine intentions and
-              commitment to you. I don't expect perfection.
-              I just want the opportunity to show you how
-              sincerely I care.
-            </p>
-
-            <p class="meet-message">
-              So, I hope you'll let me give this to you in person. ♡
-            </p>
-
-          </div>
-
-        </section>
-
-        <!-- COURTING QUESTION -->
-        <section class="question-section">
-
-          <span class="eyebrow">
-            SO, HERE IS WHAT I WANTED TO ASK
-          </span>
-
-          <h2 id="question">
-            Would you let me<br>
-            <em>court you?</em>
-          </h2>
-
-          <p>
-            Whatever your answer is, I will respect it.
-            You deserve to choose freely, and I want you to feel
-            comfortable being honest with me.
-          </p>
-
-          <div class="answer-buttons">
-
-            <button
-              id="yesButton"
-              class="primary-button"
-              type="button"
-            >
-              Yes, I'd like that <span>♡</span>
-            </button>
-
-            <button
-              id="talkButton"
-              class="secondary-button"
-              type="button"
-            >
-              No, thank you
-            </button>
-
-          </div>
-
-          <p
-            id="answerFeedback"
-            class="answer-feedback"
-            aria-live="polite"
-          ></p>
-
-          <div class="closing-heart">♡</div>
-
-        </section>
-
-      </div>
-    </div>
-
   </main>
 
-  <!-- FOOTER -->
   <footer>
-    <span>made with care, just for you</span>
-    <span>♡</span>
+    made with love, just for you ♡
   </footer>
 
+  <!-- LETTER POPUP -->
+  <div id="letterModal" class="journey-modal hidden"
+       role="dialog" aria-modal="true">
+
+    <div class="journey-card letter-card">
+
+      <button class="close-modal" id="closeLetter" aria-label="Close">×</button>
+
+      <span class="eyebrow">A FEW WORDS FROM MY HEART</span>
+
+      <div class="letter-paper">
+
+        <div class="letter-heart">♡</div>
+
+        <p class="letter-greeting" id="greeting">Dear you,</p>
+
+        <div id="displayMessage" class="message-text">
+          There are things that are difficult to express in words,
+          but I want you to know how much you mean to me.
+        </div>
+
+        <p class="letter-signoff">With all my sincerity,</p>
+
+        <p id="signature" class="signature">Someone who cares about you</p>
+
+        <button id="continueToRing" class="primary-button full-button">
+          There's something else I want to show you ♡
+        </button>
+
+      </div>
+
+    </div>
+  </div>
+
+  <!-- PROMISE RING POPUP -->
+  <div id="ringModal" class="journey-modal hidden"
+       role="dialog" aria-modal="true">
+
+    <div class="journey-card ring-card">
+
+      <button class="close-modal" id="closeRing" aria-label="Close">×</button>
+
+      <section class="ring-section">
+
+        <span class="eyebrow">A LITTLE PROMISE, FROM ME TO YOU</span>
+
+        <h2>
+          Something special<br>
+          <em>chosen for you.</em>
+        </h2>
+
+        <p class="ring-intro">
+          I want to show you something I bought with you in mind.
+        </p>
+
+        <div class="ring-photo-container">
+
+          <img id="displayRingPhoto"
+               class="hidden"
+               src=""
+               alt="The promise ring I bought for you">
+
+          <div id="ringPlaceholder" class="ring-placeholder">
+            <span>♡</span>
+            <p>A promise waiting to be shared.</p>
+          </div>
+
+        </div>
+
+        <div class="ring-message">
+
+          <p>
+            This is not just a ring to me. It symbolizes my genuine
+            intentions, my sincerity, and the commitment I want
+            to show you.
+          </p>
+
+          <p>
+            But I don't want to give it to you through a screen.
+            I want to see you in person, look into your eyes,
+            and personally place this little promise in your hands.
+          </p>
+
+          <p>
+            I want this to be a real moment that we can remember,
+            not just something we see on a website.
+          </p>
+
+          <p class="ring-highlight">
+            I hope you'll let me give this to you personally. ♡
+          </p>
+
+        </div>
+
+        <button id="continueToQuestion" class="primary-button full-button">
+          There's one more thing I want to ask ♡
+        </button>
+
+      </section>
+
+    </div>
+  </div>
+
+  <!-- COURTING QUESTION POPUP -->
+  <div id="proposalModal" class="journey-modal hidden"
+       role="dialog" aria-modal="true">
+
+    <div class="journey-card question-card">
+
+      <button class="close-modal" id="closeProposal" aria-label="Close">×</button>
+
+      <span class="eyebrow">SO, HERE IS MY QUESTION</span>
+
+      <div class="question-heart">♡</div>
+
+      <h2 id="question">
+        Would you let me<br>
+        <em>court you?</em>
+      </h2>
+
+      <p>
+        I don't want to rush anything. I just want the opportunity
+        to know you better, make you happy, and show you how
+        genuine my intentions are.
+      </p>
+
+      <p class="question-small">
+        Whatever your answer is, I will respect your feelings. ♡
+      </p>
+
+      <div class="answer-buttons">
+
+        <button id="yesButton" class="primary-button">
+          Yes, I'd like that ♡
+        </button>
+
+        <button id="talkButton" class="secondary-button">
+          No, thank you
+        </button>
+
+      </div>
+
+      <p id="answerFeedback" class="answer-feedback" aria-live="polite"></p>
+
+    </div>
+
+  </div>
+
   <!-- THANK YOU POPUP -->
-  <div
-    id="responseModal"
-    class="modal hidden"
-    role="dialog"
-    aria-modal="true"
-    aria-labelledby="modalTitle"
-  >
+  <div id="responseModal" class="modal hidden"
+       role="dialog" aria-modal="true">
 
     <div class="modal-card">
 
-      <button
-        id="closeModal"
-        class="close-modal"
-        type="button"
-        aria-label="Close"
-      >×</button>
+      <button id="closeModal" class="close-modal" aria-label="Close">×</button>
 
-      <span class="modal-heart">♡</span>
+      <div class="modal-heart">♡</div>
 
-      <h2 id="modalTitle">
-        Thank you, my love. ♡
-      </h2>
+      <h2 id="modalTitle">Thank you, my love! ♡</h2>
 
       <p id="modalText">
         You have no idea how happy you just made me.
 
         Thank you for giving me the chance to court you.
-        I promise to make an effort, be patient, and show you
-        through my actions how genuine my intentions are.
+        I promise to be patient, sincere, and consistent.
 
-        This is just the beginning of something beautiful.
-        I can't wait to create more memories with you.
+        I want to show you through my actions how genuine
+        my intentions are.
 
-        Thank you for giving me this opportunity. ♡
+        I can't wait to see you and give you your promise ring
+        personally.
+
+        This is just the beginning of something beautiful. ♡
       </p>
 
-      <button id="modalDone" class="primary-button" type="button">
+      <button id="modalDone" class="primary-button full-button">
         Close ♡
       </button>
 
     </div>
   </div>
 
-  <!-- SCRIPTS -->
   <script src="config.js"></script>
   <script src="script.js"></script>
 
